@@ -101,6 +101,13 @@ unparagraphs =
 paragraphs :: String -> [String]
 paragraphs = splitOn "\n\n"
 
+-- | A strict 'readFile'.
+readFile' :: FilePath -> IO String
+readFile' path = do
+  x <- readFile path
+  evaluate (length x)
+  return x
+
 main :: IO ()
 main = do
   -- Create a repository.
@@ -161,8 +168,7 @@ main = do
 
   -- Edit the .cabal file.
   let cabalName = printf "%s.cabal" repo
-  cabalFile <- readFile cabalName
-  evaluate (length cabalFile)
+  cabalFile <- readFile' cabalName
   testedVersions <- words <$>
     queryDef "Versions of GHC to test with?" "7.8.4 7.10.3"
   longDescription <-
@@ -226,8 +232,7 @@ main = do
   "rm" ["make_travis_yml.hs"]
 
   -- Edit the .travis.yml file.
-  travisFile <- readFile travisName
-  evaluate (length travisFile)
+  travisFile <- readFile' travisName
   writeFile travisName $ flip execState travisFile $ do
     -- Don't tolerate warnings.
     let werror = "- cabal build --ghc-options=-Werror"
