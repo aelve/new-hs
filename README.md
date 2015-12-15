@@ -6,20 +6,12 @@ This is a script for creating a Haskell project.
 
 It creates a new folder with Git repository in it, and then creates a corresponding repository on Github.
 
-Minor stuff:
-
   * It creates a good .gitignore file.
   * It sets up branch tracking (so that `git pull` would work automatically).
 
 ### Cabal
 
-It generates a .cabal file using `cabal init`, and optionally creates a Cabal sandbox. It also fills in some additional fields:
-
-  * the `tested-with` field
-  * the `bug-reports` field
-  * the `source-repository` section
-
-Minor stuff:
+It generates a .cabal file using `cabal init`, and optionally creates a Cabal sandbox. It also fills in some additional fields: `tested-with`, `bug-reports`, and the `source-repository` section.
 
   * It enables all warnings (excluding `warn-unused-do-bind`).
   * It creates an empty module and a changelog.
@@ -28,8 +20,6 @@ Minor stuff:
 ### Travis-CI
 
 It enables [Travis-CI](http://travis-ci.org/) for the repository and generate a .travis.yml file using hvr's [multi-ghc-travis](https://github.com/hvr/multi-ghc-travis) script.
-
-Minor stuff:
 
   * It makes Travis-CI treat warnings as errors (by adding `-Werror`).
 
