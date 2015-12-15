@@ -2,11 +2,10 @@
 
 This is a script for creating a Haskell project:
 
-* **create a repository on Github**
+* <u>**create a repository on Github**</u>
 * create a comprehensive .gitignore file
 * set up branch tracking
-
-* **generate .cabal file**
+* <u>**generate .cabal file**</u>
 * create a changelog
 * create a LICENSE file with the [CC0](https://creativecommons.org/publicdomain/zero/1.0/legalcode) license if you have chosen “PublicDomain” as the license
 * fill in the `tested-with` field
@@ -15,8 +14,7 @@ This is a script for creating a Haskell project:
 * enable all warnings (excluding `warn-unused-do-bind`)
 * create an empty module
 * optionally create a Cabal sandbox
-
-* **enable [Travis-CI](http://travis-ci.org/) for the repository** and generate a .travis.yml file using hvr's [multi-ghc-travis](https://github.com/hvr/multi-ghc-travis)
+* <u>**enable [Travis-CI](http://travis-ci.org/) for the repository**</u> and generate a .travis.yml file using hvr's [multi-ghc-travis](https://github.com/hvr/multi-ghc-travis)
 * make Travis-CI treat warnings as errors
 
 ## Requirements
