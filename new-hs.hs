@@ -101,6 +101,15 @@ unparagraphs =
 paragraphs :: String -> [String]
 paragraphs = splitOn "\n\n"
 
+overSectionList :: ([String] -> [String]) -> String -> String
+overSectionList f = unparagraphs . f . paragraphs
+
+inMainSection :: (String -> String) -> String -> String
+inMainSection f = overSectionList (\(p:ps) -> f p : ps)
+
+inEachSection :: (String -> String) -> String -> String
+inEachSection f = overSectionList (map f)
+
 -- | A strict 'readFile'.
 readFile' :: FilePath -> IO String
 readFile' path = do
@@ -176,45 +185,40 @@ main = do
     queryDef "Longer description?" "repo description"
   writeFile cabalName $ flip execState cabalFile $ do
     -- Remove the “generated with cabal” comment.
-    modify $ unparagraphs . tail . paragraphs
+    modify $ overSectionList tail
     -- Add a source-repository section.
     let sourceRepo = unlines [
           "source-repository head",
           "  type:                git",
           printf "  location:            git://github.com/%s/%s.git"
             owner repo ]
-    modify $ unparagraphs . (\(p:ps) -> (p:sourceRepo:ps)) . paragraphs
+    modify $ overSectionList (\(p:ps) -> (p:sourceRepo:ps))
     -- Add a bug-reports field.
     let bugReports =
           printf "bug-reports:         http://github.com/%s/%s/issues"
             owner repo
-    modify $ \s -> do
-      let (p:ps) = paragraphs s
+    modify $ inMainSection $ \p ->
       let (l, x:r) = break ("homepage" ~==) (lines p)
-      unparagraphs (unlines (l ++ [x, bugReports] ++ r) : ps)
+      in  unlines (l ++ [x, bugReports] ++ r)
     -- Add a tested-with field.
     let testedWith = "tested-with:         " ++
           intercalate ", " (map ("GHC == " ++) testedVersions)
-    modify $ \s -> do
-      let (p:ps) = paragraphs s
+    modify $ inMainSection $ \p ->
       let (l, x:r) = break ("category" ~==) (lines p)
-      unparagraphs (unlines (l ++ [x, testedWith] ++ r) : ps)
+      in  unlines (l ++ [x, testedWith] ++ r)
     -- Add a longer description.
     let desc1 = "description:"
         desc2 = "  " ++ longDescription
-    modify $ \s -> do
-      let (p:ps) = paragraphs s
+    modify $ inMainSection $ \p ->
       let (l, _:r) = break ("-- description" ~==) (lines p)
-      unparagraphs (unlines (l ++ [desc1, desc2] ++ r) : ps)
+      in  unlines (l ++ [desc1, desc2] ++ r)
     -- Enable warnings.
     let ghcOptions = "  ghc-options:         -Wall -fno-warn-unused-do-bind"
-    modify $ unparagraphs
-           . map (\p ->
-               if "hs-source-dirs" =~= p
-                 then let (l, x:r) = break ("  hs-source-dirs" ~==) (lines p)
-                      in  unlines (l ++ [ghcOptions, x] ++ r)
-                 else p)
-           . paragraphs
+    modify $ inEachSection $ \p ->
+      if "hs-source-dirs" =~= p
+        then let (l, x:r) = break ("  hs-source-dirs" ~==) (lines p)
+             in  unlines (l ++ [ghcOptions, x] ++ r)
+        else p
   "cabal" ["check"]
 
   -- Create Cabal sandbox.
@@ -236,11 +240,10 @@ main = do
   writeFile travisName $ flip execState travisFile $ do
     -- Don't tolerate warnings.
     let werror = "- cabal build --ghc-options=-Werror"
-    modify $ unparagraphs
-           . map (\p -> if "script:" =~= p
-                          then replace "- cabal build" werror p
-                          else p)
-           . paragraphs
+    modify $ inEachSection $ \p ->
+      if "script:" =~= p
+        then replace "- cabal build" werror p
+        else p
 
   -- Create a module.
   when isLib $ do
