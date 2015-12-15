@@ -253,6 +253,9 @@ main = do
   "git" ["add", "."]
   "git" ["commit", "-m", "Initial commit"]
 
+  -- Track the branch.
+  "git" ["branch", "--set-upstream-to=origin/master", "master"]
+
 {-
 
 Table of contents:
