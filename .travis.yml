@@ -24,4 +24,4 @@ install:
  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
 
 script:
- - ghc -Wall -fno-warn-unused-do-bind -Werror -O new.hs
+ - ghc -Wall -fno-warn-unused-do-bind -Werror -O new-hs.hs
