@@ -1,5 +1,7 @@
 # new-hs
 
+[![Build status](https://secure.travis-ci.org/aelve/new-hs.svg)](http://travis-ci.org/aelve/new-hs)
+
 This is a script for creating a Haskell project.
 
 ### Repository
