@@ -28,6 +28,9 @@ import Text.Printf
 defaultOwner :: String
 defaultOwner = "aelve"
 
+defaultLicense :: String
+defaultLicense = "BSD3"
+
 -- The main script.
 
 main :: IO ()
@@ -67,7 +70,8 @@ main = do
     "  * Utility",
     ""]
   category <- query "Category?"
-  license <- choose "License?" (words "BSD3 BSD2 GPL-3 GPL-2 MIT PublicDomain")
+  license <- choose "License?"
+    (nub (defaultLicense : words "BSD3 BSD2 GPL-3 GPL-2 MIT PublicDomain"))
   when (license == "PublicDomain") $ do
     putStrLn "Cabal doesn't have a preferred public domain license;"
     putStrLn "generating a LICENSE file with CC0."
