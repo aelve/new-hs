@@ -25,6 +25,7 @@ import Text.Printf
 
 instance (a ~ String, b ~ ()) => IsString ([a] -> IO b) where
   fromString "cd" [arg] = setCurrentDirectory arg
+  -- TODO: once GHC 7.6 is dropped, just use callCommand
   fromString cmd args = do
     exit_code <- system (showCommandForUser cmd args)
     case exit_code of
@@ -187,6 +188,7 @@ main = do
   -- Edit the .cabal file.
   let cabalName = printf "%s.cabal" repo
   cabalFile <- readFile' cabalName
+  -- TODO: once GHC 7.8 is dropped, switch to <$>
   testedVersions <- words `fmap`
     queryDef "Versions of GHC to test with?" "7.8.4 7.10.3"
   longDescription <-
