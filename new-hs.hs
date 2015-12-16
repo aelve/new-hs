@@ -120,14 +120,14 @@ readFile' path = do
 main :: IO ()
 main = do
   -- Create a repository.
-  owner <- queryDef "Owner?" "aelve"
-  repo <- query "Repo?"
+  owner <- queryDef "Repository owner?" "aelve"
+  repo <- query "Repository?"
   "mkdir" [repo]
   "cd" [repo]
   "git" ["init"]
 
   -- Create the repository on Github.
-  description <- query "Description?"
+  description <- query "Short project description?"
   "hub" ["create", "-d", description, printf "%s/%s" owner repo]
 
   -- Create a .gitignore.
