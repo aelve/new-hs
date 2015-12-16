@@ -18,13 +18,18 @@ import Control.Monad.Trans.State
 import Data.List
 import Data.String
 import System.Directory
+import System.Exit
 import System.Process
 import Text.Printf
 
 
 instance (a ~ String, b ~ ()) => IsString ([a] -> IO b) where
   fromString "cd" [arg] = setCurrentDirectory arg
-  fromString cmd args = callCommand $ showCommandForUser cmd args
+  fromString cmd args = do
+    exit_code <- system (showCommandForUser cmd args)
+    case exit_code of
+      ExitSuccess   -> return ()
+      ExitFailure r -> error $ printf "%s failed with exit code %d" cmd r
 
 printQuestion :: String -> [String] -> IO ()
 printQuestion question (def:rest) =
