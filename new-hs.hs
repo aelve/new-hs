@@ -31,6 +31,9 @@ defaultOwner = "aelve"
 defaultLicense :: String
 defaultLicense = "BSD3"
 
+defaultGHC :: String
+defaultGHC = "7.8.4 7.10.3"
+
 -- The main script.
 
 main :: IO ()
@@ -99,7 +102,7 @@ main = do
   cabalFile <- readFile' cabalName
   -- TODO: once GHC 7.8 is dropped, switch to <$>
   testedVersions <- words `fmap`
-    queryDef "Versions of GHC to test with?" "7.8.4 7.10.3"
+    queryDef "Versions of GHC to test with? (space-separated)" defaultGHC
   longDescription <-
     (\s -> if s == "repo description" then description else s) `fmap`
     queryDef "Longer description?" "repo description"
