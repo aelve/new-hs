@@ -23,14 +23,17 @@ import System.Process
 import Text.Printf
 
 
+-- TODO: once GHC 7.6 is dropped, just use callCommand
+callCommand' :: String -> IO ()
+callCommand' cmd = do
+  exit_code <- system cmd
+  case exit_code of
+    ExitSuccess   -> return ()
+    ExitFailure r -> error $ printf "%s failed with exit code %d" cmd r
+
 instance (a ~ String, b ~ ()) => IsString ([a] -> IO b) where
   fromString "cd" [arg] = setCurrentDirectory arg
-  -- TODO: once GHC 7.6 is dropped, just use callCommand
-  fromString cmd args = do
-    exit_code <- system (showCommandForUser cmd args)
-    case exit_code of
-      ExitSuccess   -> return ()
-      ExitFailure r -> error $ printf "%s failed with exit code %d" cmd r
+  fromString cmd args = callCommand' (showCommandForUser cmd args)
 
 printQuestion :: String -> [String] -> IO ()
 printQuestion question (def:rest) =
@@ -243,7 +246,7 @@ main = do
   "wget" ["https://raw.githubusercontent.com/hvr/multi-ghc-travis\
           \/master/make_travis_yml.hs"]
   "chmod" ["+x", "make_travis_yml.hs"]
-  callCommand (printf "./make_travis_yml.hs %s > %s" cabalName travisName)
+  callCommand' (printf "./make_travis_yml.hs %s > %s" cabalName travisName)
   "rm" ["make_travis_yml.hs"]
 
   -- Edit the .travis.yml file.
