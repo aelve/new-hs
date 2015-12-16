@@ -15,7 +15,6 @@ MultiWayIf
 import Control.Exception
 import Control.Monad
 import Control.Monad.Trans.State
-import Data.Functor
 import Data.List
 import Data.String
 import System.Directory
