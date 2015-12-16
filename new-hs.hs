@@ -23,6 +23,11 @@ import System.Process
 import Text.Printf
 
 
+-- Settings
+
+defaultOwner :: String
+defaultOwner = "aelve"
+
 -- TODO: once GHC 7.6 is dropped, just use callCommand
 callCommand' :: String -> IO ()
 callCommand' cmd = do
@@ -133,7 +138,7 @@ readFile' path = do
 main :: IO ()
 main = do
   -- Create a repository.
-  owner <- queryDef "Repository owner?" "aelve"
+  owner <- queryDef "Repository owner?" defaultOwner
   repo <- query "Repository?"
   "mkdir" [repo]
   "cd" [repo]
