@@ -28,112 +28,7 @@ import Text.Printf
 defaultOwner :: String
 defaultOwner = "aelve"
 
--- TODO: once GHC 7.6 is dropped, just use callCommand
-callCommand' :: String -> IO ()
-callCommand' cmd = do
-  exit_code <- system cmd
-  case exit_code of
-    ExitSuccess   -> return ()
-    ExitFailure r -> error $ printf "%s failed with exit code %d" cmd r
-
-instance (a ~ String, b ~ ()) => IsString ([a] -> IO b) where
-  fromString "cd" [arg] = setCurrentDirectory arg
-  fromString cmd args = callCommand' (showCommandForUser cmd args)
-
-printQuestion :: String -> [String] -> IO ()
-printQuestion question (def:rest) =
-  printf "%s [%s]%s " question def (concat (map ('/':) rest))
-printQuestion question [] =
-  printf "%s " question
-
-ask :: String -> [(String, IO a)] -> IO a
-ask question choices = do
-  printQuestion question (map fst choices)
-  answer <- getLine
-  if | null answer ->
-         snd (head choices)
-     | Just action <- lookup answer choices ->
-         action
-     | otherwise -> do
-         putStrLn "This wasn't a valid choice."
-         ask question choices
-
-choose :: String -> [String] -> IO String
-choose question choices = do
-  printQuestion question choices
-  answer <- getLine
-  if | null answer ->
-         return (head choices)
-     | answer `elem` choices ->
-         return answer
-     | otherwise -> do
-         putStrLn "This wasn't a valid choice."
-         choose question choices
-
-query :: String -> IO String
-query question = do
-  printf "%s " question
-  answer <- getLine
-  if | null answer -> do
-         putStrLn "An answer is required."
-         query question
-     | otherwise ->
-         return answer
-
-queryDef :: String -> String -> IO String
-queryDef question defAnswer = do
-  printf "%s [%s] " question defAnswer
-  answer <- getLine
-  if | null answer ->
-         return defAnswer
-     | otherwise ->
-         return answer
-
-(==>) :: a -> b -> (a, b)
-(==>) = (,)
-
-(~==), (=~=) :: String -> String -> Bool
-(~==) = isPrefixOf
-(=~=) = isInfixOf
-
-splitOn :: String -> String -> [String]
-splitOn _   ""  = []
-splitOn sep str = go "" str
-  where
-    sepLen = length sep
-    go acc s
-      | null s && null acc = [""]
-      | null s             = [reverse acc]
-      | sep ~== s          = reverse acc : go "" (drop sepLen s)
-      | otherwise          = go (head s : acc) (tail s)
-
-replace :: String -> String -> String -> String
-replace old new = intercalate new . splitOn old
-
--- | Separate paragraphs with blank lines.
-unparagraphs :: [String] -> String
-unparagraphs =
-  intercalate "\n" . map (++ "\n") .
-  map (dropWhile (== '\n')) . map (dropWhileEnd (== '\n'))
-
-paragraphs :: String -> [String]
-paragraphs = splitOn "\n\n"
-
-overSectionList :: ([String] -> [String]) -> String -> String
-overSectionList f = unparagraphs . f . paragraphs
-
-inMainSection :: (String -> String) -> String -> String
-inMainSection f = overSectionList (\(p:ps) -> f p : ps)
-
-inEachSection :: (String -> String) -> String -> String
-inEachSection f = overSectionList (map f)
-
--- | A strict 'readFile'.
-readFile' :: FilePath -> IO String
-readFile' path = do
-  x <- readFile path
-  evaluate (length x)
-  return x
+-- The main script.
 
 main :: IO ()
 main = do
@@ -279,6 +174,116 @@ main = do
 
   -- Track the branch.
   "git" ["branch", "--set-upstream-to=origin/master", "master"]
+
+-- Utilities.
+
+overSectionList :: ([String] -> [String]) -> String -> String
+overSectionList f = unparagraphs . f . paragraphs
+
+inMainSection :: (String -> String) -> String -> String
+inMainSection f = overSectionList (\(p:ps) -> f p : ps)
+
+inEachSection :: (String -> String) -> String -> String
+inEachSection f = overSectionList (map f)
+
+-- TODO: once GHC 7.6 is dropped, just use callCommand
+callCommand' :: String -> IO ()
+callCommand' cmd = do
+  exit_code <- system cmd
+  case exit_code of
+    ExitSuccess   -> return ()
+    ExitFailure r -> error $ printf "%s failed with exit code %d" cmd r
+
+-- This is needed to be able to call commands by writing strings.
+instance (a ~ String, b ~ ()) => IsString ([a] -> IO b) where
+  fromString "cd" [arg] = setCurrentDirectory arg
+  fromString cmd args = callCommand' (showCommandForUser cmd args)
+
+printQuestion :: String -> [String] -> IO ()
+printQuestion question (def:rest) =
+  printf "%s [%s]%s " question def (concat (map ('/':) rest))
+printQuestion question [] =
+  printf "%s " question
+
+ask :: String -> [(String, IO a)] -> IO a
+ask question choices = do
+  printQuestion question (map fst choices)
+  answer <- getLine
+  if | null answer ->
+         snd (head choices)
+     | Just action <- lookup answer choices ->
+         action
+     | otherwise -> do
+         putStrLn "This wasn't a valid choice."
+         ask question choices
+
+choose :: String -> [String] -> IO String
+choose question choices = do
+  printQuestion question choices
+  answer <- getLine
+  if | null answer ->
+         return (head choices)
+     | answer `elem` choices ->
+         return answer
+     | otherwise -> do
+         putStrLn "This wasn't a valid choice."
+         choose question choices
+
+query :: String -> IO String
+query question = do
+  printf "%s " question
+  answer <- getLine
+  if | null answer -> do
+         putStrLn "An answer is required."
+         query question
+     | otherwise ->
+         return answer
+
+queryDef :: String -> String -> IO String
+queryDef question defAnswer = do
+  printf "%s [%s] " question defAnswer
+  answer <- getLine
+  if | null answer ->
+         return defAnswer
+     | otherwise ->
+         return answer
+
+(==>) :: a -> b -> (a, b)
+(==>) = (,)
+
+(~==), (=~=) :: String -> String -> Bool
+(~==) = isPrefixOf
+(=~=) = isInfixOf
+
+splitOn :: String -> String -> [String]
+splitOn _   ""  = []
+splitOn sep str = go "" str
+  where
+    sepLen = length sep
+    go acc s
+      | null s && null acc = [""]
+      | null s             = [reverse acc]
+      | sep ~== s          = reverse acc : go "" (drop sepLen s)
+      | otherwise          = go (head s : acc) (tail s)
+
+replace :: String -> String -> String -> String
+replace old new = intercalate new . splitOn old
+
+-- | Separate paragraphs with blank lines.
+unparagraphs :: [String] -> String
+unparagraphs =
+  intercalate "\n" . map (++ "\n") .
+  map (dropWhile (== '\n')) . map (dropWhileEnd (== '\n'))
+
+paragraphs :: String -> [String]
+paragraphs = splitOn "\n\n"
+
+-- | A strict 'readFile'.
+readFile' :: FilePath -> IO String
+readFile' path = do
+  x <- readFile path
+  evaluate (length x)
+  return x
 
 {-
 
