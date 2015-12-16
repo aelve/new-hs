@@ -1,0 +1,27 @@
+# This file has been generated -- see https://github.com/hvr/multi-ghc-travis
+language: c
+sudo: false
+
+matrix:
+  include:
+    - env: GHCVER=7.6.3
+      compiler: ": #GHC 7.6.3"
+      addons: {apt: {packages: [ghc-7.6.3],  sources: [hvr-ghc]}}
+    - env: GHCVER=7.8.4
+      compiler: ": #GHC 7.8.4"
+      addons: {apt: {packages: [ghc-7.8.4],  sources: [hvr-ghc]}}
+    - env: GHCVER=7.10.3
+      compiler: ": #GHC 7.10.3"
+      addons: {apt: {packages: [ghc-7.10.3], sources: [hvr-ghc]}}
+    - env: GHCVER=head
+      addons: {apt: {packages: [ghc-head],   sources: [hvr-ghc]}}
+
+before_install:
+ - unset CC
+ - export PATH=/opt/ghc/$GHCVER/bin:$PATH
+
+install:
+ - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+
+script:
+ - ghc -Wall -fno-warn-unused-do-bind -Werror -O new.hs
