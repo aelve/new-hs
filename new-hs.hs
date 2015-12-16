@@ -1,6 +1,9 @@
 #!/usr/bin/env runghc
 
 
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
+
 {-# LANGUAGE
 OverloadedStrings,
 FlexibleInstances,
@@ -26,7 +29,9 @@ instance (a ~ String, b ~ ()) => IsString ([a] -> IO b) where
 
 printQuestion :: String -> [String] -> IO ()
 printQuestion question (def:rest) =
-  printf "%s [%s]/%s " question def (intercalate "/" rest)
+  printf "%s [%s]%s " question def (concat (map ('/':) rest))
+printQuestion question [] =
+  printf "%s " question
 
 ask :: String -> [(String, IO a)] -> IO a
 ask question choices = do
@@ -74,20 +79,20 @@ queryDef question defAnswer = do
 (==>) :: a -> b -> (a, b)
 (==>) = (,)
 
-(~==), (=~=), (==~) :: String -> String -> Bool
+(~==), (=~=) :: String -> String -> Bool
 (~==) = isPrefixOf
 (=~=) = isInfixOf
-(==~) = isSuffixOf
 
 splitOn :: String -> String -> [String]
-splitOn _ "" = []
-splitOn x s = go "" s
+splitOn _   ""  = []
+splitOn sep str = go "" str
   where
-    go b s
-      | null s && null b = [""]
-      | null s           = [reverse b]
-      | x ~== s          = reverse b : go "" (drop (length x) s)
-      | otherwise        = go (head s : b) (tail s)
+    sepLen = length sep
+    go acc s
+      | null s && null acc = [""]
+      | null s             = [reverse acc]
+      | sep ~== s          = reverse acc : go "" (drop sepLen s)
+      | otherwise          = go (head s : acc) (tail s)
 
 replace :: String -> String -> String -> String
 replace old new = intercalate new . splitOn old
@@ -157,7 +162,7 @@ main = do
   license <- choose "License?" (words "BSD3 BSD2 GPL-3 GPL-2 MIT PublicDomain")
   when (license == "PublicDomain") $
     writeFile "LICENSE" publicDomainLicense
-  (isLib, isExe) <- ask "Library or executable?" [
+  (isLib, _isExe) <- ask "Library or executable?" [
     "lib"  ==> return (True, False),
     "exe"  ==> return (False, True),
     "both" ==> return (True, True) ]
@@ -270,6 +275,7 @@ Table of contents:
 
 -}
 
+gitignore :: String
 gitignore = unlines [
   "dist",
   "cabal-dev",
@@ -294,17 +300,20 @@ gitignore = unlines [
   "*~",
   "*#" ]
 
+changelog :: String
 changelog = unlines [
   "# 0.1.0.0",
   "",
   "First release."]
 
+emptyModule :: String -> String
 emptyModule name = unlines [
   "module " ++ name,
   "(",
   ")",
   "where" ]
 
+publicDomainLicense :: String
 publicDomainLicense = unlines [
   "     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT",
   "     PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT",
