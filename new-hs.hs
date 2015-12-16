@@ -182,10 +182,10 @@ main = do
   -- Edit the .cabal file.
   let cabalName = printf "%s.cabal" repo
   cabalFile <- readFile' cabalName
-  testedVersions <- words <$>
+  testedVersions <- words `fmap`
     queryDef "Versions of GHC to test with?" "7.8.4 7.10.3"
   longDescription <-
-    (\s -> if s == "repo description" then description else s) <$>
+    (\s -> if s == "repo description" then description else s) `fmap`
     queryDef "Longer description?" "repo description"
   writeFile cabalName $ flip execState cabalFile $ do
     -- Remove the “generated with cabal” comment.
