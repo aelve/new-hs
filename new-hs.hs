@@ -168,7 +168,9 @@ main = do
     ""]
   category <- query "Category?"
   license <- choose "License?" (words "BSD3 BSD2 GPL-3 GPL-2 MIT PublicDomain")
-  when (license == "PublicDomain") $
+  when (license == "PublicDomain") $ do
+    putStrLn "Cabal doesn't have a preferred public domain license;"
+    putStrLn "generating a LICENSE file with CC0."
     writeFile "LICENSE" publicDomainLicense
   (isLib, _isExe) <- ask "Library or executable?" [
     "lib"  ==> return (True, False),
