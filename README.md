@@ -25,7 +25,7 @@ It enables [Travis-CI](http://travis-ci.org/) for the repository and generate a 
 
 ## Requirements
 
-* GHC to run the script
+* GHC to run the script (7.6.3 or later)
 * Git to create the repository
 * cabal-install to create the project
 * Github's client [`hub`](https://github.com/github/hub)
