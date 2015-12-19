@@ -2,7 +2,22 @@
 
 [![Build status](https://secure.travis-ci.org/aelve/new-hs.svg)](http://travis-ci.org/aelve/new-hs)
 
-This is a script for creating a Haskell project.
+This is a script for creating a Haskell project and setting up everything that one usually wants to set up (well, not everything, but I'll add some features -that others use- later). To use it, download `new-hs.hs` and then put it somewhere in your `PATH` (for instance, `/usr/local/bin`):
+
+    $ wget https://github.com/aelve/new-hs/blob/master/new-hs.hs
+    $ sudo mv new-hs.hs /usr/local/bin/new-hs
+
+After that, call `new-hs`, answer the questions, and a new project would be created in a subfolder.
+
+## Features
+
+Note that the following features are currently missing:
+
+  * supporting any VCS but Git
+  * supporting anything but Github
+  * creating a [Stack](http://haskellstack.org) project
+  * *not* creating a repository / enabling Travis-CI / etc
+  * testing on GHC HEAD
 
 ### Repository
 
