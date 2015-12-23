@@ -5,6 +5,7 @@
 This is a script for creating a Haskell project and setting up everything that one usually wants to set up (well, not everything, but I'll add some features -that others use- later). To use it, download `new-hs.hs` and then put it somewhere in your `PATH` (for instance, `/usr/local/bin`):
 
     $ wget https://github.com/aelve/new-hs/blob/master/new-hs.hs
+    $ chmod +x new-hs.hs
     $ sudo mv new-hs.hs /usr/local/bin/new-hs
 
 After that, call `new-hs`, answer the questions, and a new project would be created in a subfolder.
