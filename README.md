@@ -26,13 +26,14 @@ It creates a new folder with Git repository in it, and then creates a correspond
   * It creates a good .gitignore file.
   * It sets up branch tracking (so that `git pull` would work automatically).
 
-### Cabal
+### Project
 
 It generates a .cabal file using `cabal init`, and optionally creates a Cabal sandbox. It also fills in some additional fields: `tested-with`, `bug-reports`, and the `source-repository` section.
 
   * It enables all warnings (excluding `warn-unused-do-bind`).
-  * It creates an empty module and a changelog.
   * If you have chosen to put your code into public domain, it creates a LICENSE file with [CC0](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
+  * It creates an empty module and a changelog.
+  * It creates a readme with Travis, Hackage, and license badges.
 
 ### Travis-CI
 

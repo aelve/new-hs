@@ -8,6 +8,7 @@
 OverloadedStrings,
 FlexibleInstances,
 TypeFamilies,
+ScopedTypeVariables,
 MultiWayIf
   #-}
 
@@ -73,9 +74,9 @@ main = do
     "  * Utility",
     ""]
   category <- query "Category?"
-  license <- choose "License?"
+  licenseCabal <- choose "License?"
     (nub (defaultLicense : words "BSD3 BSD2 GPL-3 GPL-2 MIT PublicDomain"))
-  when (license == "PublicDomain") $ do
+  when (licenseCabal == "PublicDomain") $ do
     putStrLn "Cabal doesn't have a preferred public domain license;"
     putStrLn "generating a LICENSE file with CC0."
     writeFile "LICENSE" publicDomainLicense
@@ -91,11 +92,12 @@ main = do
     "--synopsis", description,
     "--homepage", printf "http://github.com/%s/%s" owner repo,
     "--category", category,
-    "--license", license,
+    "--license", licenseCabal,
     if isLib then "--is-library" else "--is-executable",
     "--extra-source-file", "CHANGELOG.md",
     "--source-dir", if isLib then "lib" else "src",
     "--expose-module", someModule ]
+  let license = if licenseCabal == "PublicDomain" then "CC0" else licenseCabal
 
   -- Edit the .cabal file.
   let cabalName = printf "%s.cabal" repo
@@ -143,6 +145,9 @@ main = do
              in  unlines (l ++ [ghcOptions, x] ++ r)
         else p
   "cabal" ["check"]
+
+  -- Create a readme.
+  writeFile "README.md" (readme owner repo license)
 
   -- Create Cabal sandbox.
   ask "Create Cabal sandbox?" [
@@ -298,6 +303,7 @@ Table of contents:
 
   * gitignore
   * changelog
+  * readme
   * emptyModule
   * publicDomainLicense
 
@@ -333,6 +339,27 @@ changelog = unlines [
   "# 0.1.0.0",
   "",
   "First release."]
+
+readme :: String -> String -> String -> String
+readme owner repo license = unlines $ [
+  printf "# %s" repo,
+  "",
+  printf "[![Hackage](%s)](%s)" hackageShield hackageLink,
+  printf "[![Build status](%s)](%s)" travisShield travisLink,
+  printf "[![%s license](%s)](%s)" license licenseShield licenseLink ]
+  where
+    hackageShield :: String =
+      printf "https://img.shields.io/hackage/v/%s.svg" repo
+    hackageLink :: String =
+      printf "https://hackage.haskell.org/package/%s" repo
+    travisShield :: String =
+      printf "https://secure.travis-ci.org/%s/%s.svg" owner repo
+    travisLink :: String =
+      printf "https://travis-ci.org/%s/%s" owner repo
+    licenseShield :: String =
+      printf "https://img.shields.io/badge/license-%s-blue.svg" (replace "-" "--" license)
+    licenseLink :: String =
+      printf "https://github.com/%s/%s/blob/master/LICENSE" owner repo
 
 emptyModule :: String -> String
 emptyModule name = unlines [
