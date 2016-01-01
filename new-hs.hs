@@ -91,7 +91,7 @@ generateProject owner repo description = do
     putStrLn "Cabal doesn't have a preferred public domain license;"
     putStrLn "generating a LICENSE file with CC0."
     writeFile "LICENSE" publicDomainLicense
-  (isLib, isExe) <- ask "Library or executable?" [
+  (isLib, _isExe) <- ask "Library or executable?" [
     "lib"  ==> return (True, False),
     "exe"  ==> return (False, True),
     "both" ==> return (True, True) ]
