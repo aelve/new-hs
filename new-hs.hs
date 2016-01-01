@@ -91,23 +91,38 @@ generateProject owner repo description = do
     putStrLn "Cabal doesn't have a preferred public domain license;"
     putStrLn "generating a LICENSE file with CC0."
     writeFile "LICENSE" publicDomainLicense
-  (isLib, _isExe) <- ask "Library or executable?" [
+  (isLib, isExe) <- ask "Library or executable?" [
     "lib"  ==> return (True, False),
     "exe"  ==> return (False, True),
     "both" ==> return (True, True) ]
-  someModule <- query "Some module name?"
-  "cabal" [
-    "init",
-    "--non-interactive",
-    "--no-comments",
-    "--synopsis", description,
-    "--homepage", printf "http://github.com/%s/%s" owner repo,
-    "--category", category,
-    "--license", licenseCabal,
-    if isLib then "--is-library" else "--is-executable",
-    "--extra-source-file", "CHANGELOG.md",
-    "--source-dir", if isLib then "lib" else "src",
-    "--expose-module", someModule ]
+  let defCabalFlags = [
+        "--non-interactive",
+        "--no-comments",
+        "--synopsis", description,
+        "--homepage", printf "http://github.com/%s/%s" owner repo,
+        "--category", category,
+        "--license", licenseCabal,
+        -- “file” instead of “files” is not a typo, look at cabal init --help
+        "--extra-source-file", "CHANGELOG.md" ]
+  if isLib then do
+    someModule <- query "Some module name?"
+    "cabal" $
+      ["init"] ++ defCabalFlags ++
+      ["--is-library",
+       "--source-dir", "lib",
+       "--expose-module", someModule ]
+    let moduleName = last (splitOn "." someModule)
+        moduleDir  = intercalate "/" ("lib" : init (splitOn "." someModule))
+    "mkdir" ["-p", moduleDir]
+    writeFile (printf "%s/%s.hs" moduleDir moduleName) (emptyModule someModule)
+  else do
+    "cabal" $
+      ["init"] ++ defCabalFlags ++
+      ["--is-executable",
+       "--source-dir", "src" ]
+    "mkdir" ["-p", "src"]
+    writeFile "src/Main.hs" mainModule
+
   let license = if licenseCabal == "PublicDomain" then "CC0" else licenseCabal
 
   -- Edit the .cabal file.
@@ -156,21 +171,12 @@ generateProject owner repo description = do
              in  unlines (l ++ [ghcOptions, x] ++ r)
         else p
 
-  -- Create a module.
-  when isLib $ do
-    let moduleName = last (splitOn "." someModule)
-        moduleDir  = intercalate "/" ("lib" : init (splitOn "." someModule))
-    "mkdir" ["-p", moduleDir]
-    writeFile (printf "%s/%s.hs" moduleDir moduleName) (emptyModule someModule)
+  -- Create a changelog and a readme.
+  writeFile "CHANGELOG.md" changelog
+  writeFile "README.md" (readme owner repo license)
 
   -- Use Cabal to check the resulting file.
   "cabal" ["check"]
-
-  -- Create a changelog.
-  writeFile "CHANGELOG.md" changelog
-
-  -- Create a readme.
-  writeFile "README.md" (readme owner repo license)
 
 -- | Generate Travis-CI file.
 generateTravis :: String -> IO ()
@@ -310,6 +316,7 @@ Table of contents:
   * changelog
   * readme
   * emptyModule
+  * mainModule
   * publicDomainLicense
 
 -}
@@ -372,6 +379,10 @@ emptyModule name = unlines [
   "(",
   ")",
   "where" ]
+
+mainModule :: String
+mainModule = unlines [
+  "module Main (main) where" ]
 
 publicDomainLicense :: String
 publicDomainLicense = unlines [
