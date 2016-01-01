@@ -45,18 +45,29 @@ main = do
   "mkdir" [repo]
   "cd" [repo]
   "git" ["init"]
-
   -- Create the repository on Github.
   description <- query "Short project description?"
   "hub" ["create", "-d", description, printf "%s/%s" owner repo]
-
   -- Create a .gitignore.
   writeFile ".gitignore" gitignore
+  -- Generate the project.
+  generateProject owner repo description
+  -- Create Cabal sandbox.
+  ask "Create Cabal sandbox?" [
+    "n" ==> return (),
+    "y" ==> "cabal" ["sandbox", "init"] ]
+  -- Create a .travis.yml file and enable Travis.
+  "travis" ["enable"]
+  generateTravis repo
+  -- Make a commit.
+  "git" ["add", "."]
+  "git" ["commit", "-m", "Initial commit"]
+  -- Track the branch.
+  "git" ["branch", "--set-upstream-to=origin/master", "master"]
 
-  -- Create a changelog.
-  writeFile "CHANGELOG.md" changelog
-
-  -- Generate Cabal project.
+-- | Generate the project.
+generateProject :: String -> String -> String -> IO ()
+generateProject owner repo description = do
   mapM_ putStrLn [
     "Here are some categories:",
     "",
@@ -144,23 +155,31 @@ main = do
         then let (l, x:r) = break ("  hs-source-dirs" ~==) (lines p)
              in  unlines (l ++ [ghcOptions, x] ++ r)
         else p
+
+  -- Create a module.
+  when isLib $ do
+    let moduleName = last (splitOn "." someModule)
+        moduleDir  = intercalate "/" ("lib" : init (splitOn "." someModule))
+    "mkdir" ["-p", moduleDir]
+    writeFile (printf "%s/%s.hs" moduleDir moduleName) (emptyModule someModule)
+
+  -- Use Cabal to check the resulting file.
   "cabal" ["check"]
+
+  -- Create a changelog.
+  writeFile "CHANGELOG.md" changelog
 
   -- Create a readme.
   writeFile "README.md" (readme owner repo license)
 
-  -- Create Cabal sandbox.
-  ask "Create Cabal sandbox?" [
-    "n" ==> return (),
-    "y" ==> "cabal" ["sandbox", "init"] ]
-
-  -- Create a .travis.yml file and enable Travis.
-  "travis" ["enable"]
+-- | Generate Travis-CI file.
+generateTravis :: String -> IO ()
+generateTravis repo = do
   let travisName = ".travis.yml"
   "wget" ["https://raw.githubusercontent.com/hvr/multi-ghc-travis\
           \/master/make_travis_yml.hs"]
   "chmod" ["+x", "make_travis_yml.hs"]
-  callCommand' (printf "./make_travis_yml.hs %s > %s" cabalName travisName)
+  callCommand' (printf "./make_travis_yml.hs %s.cabal > %s" repo travisName)
   "rm" ["make_travis_yml.hs"]
 
   -- Edit the .travis.yml file.
@@ -172,20 +191,6 @@ main = do
       if "script:" =~= p
         then replace "- cabal build" werror p
         else p
-
-  -- Create a module.
-  when isLib $ do
-    let moduleName = last (splitOn "." someModule)
-        moduleDir  = intercalate "/" ("lib" : init (splitOn "." someModule))
-    "mkdir" ["-p", moduleDir]
-    writeFile (printf "%s/%s.hs" moduleDir moduleName) (emptyModule someModule)
-
-  -- Make a commit.
-  "git" ["add", "."]
-  "git" ["commit", "-m", "Initial commit"]
-
-  -- Track the branch.
-  "git" ["branch", "--set-upstream-to=origin/master", "master"]
 
 -- Utilities.
 
