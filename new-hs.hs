@@ -122,6 +122,10 @@ generateProject owner repo description = do
        "--source-dir", "src" ]
     "mkdir" ["-p", "src"]
     writeFile "src/Main.hs" mainModule
+  -- Cabal prints “You may want to edit the .cabal file and add a Description
+  -- field.”, but we'll add it by ourselves.
+  putStrLn "Note: new-hs will add a description field automatically,"
+  putStrLn "there's no need to edit the .cabal file."
 
   let license = if licenseCabal == "PublicDomain" then "CC0" else licenseCabal
 
