@@ -385,7 +385,10 @@ emptyModule name = unlines [
 
 mainModule :: String
 mainModule = unlines [
-  "module Main (main) where" ]
+  "module Main (main) where",
+  "",
+  "main :: IO ()",
+  "main = return ()" ]
 
 publicDomainLicense :: String
 publicDomainLicense = unlines [
