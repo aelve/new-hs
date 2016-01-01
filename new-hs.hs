@@ -59,11 +59,10 @@ main = do
   -- Create a .travis.yml file and enable Travis.
   "travis" ["enable"]
   generateTravis repo
-  -- Make a commit.
+  -- Make a commit and push it.
   "git" ["add", "."]
-  "git" ["commit", "-m", "Initial commit"]
-  -- Track the branch.
-  "git" ["branch", "--set-upstream-to=origin/master", "master"]
+  "git" ["commit", "-m", "Create the project"]
+  "git" ["push", "-u", "origin"]
 
 -- | Generate the project.
 generateProject :: String -> String -> String -> IO ()
