@@ -10,6 +10,8 @@ This is a script for creating a Haskell project and setting up everything that o
 
 After that, call `new-hs`, answer the questions, and a new project would be created in a subfolder.
 
+To change the defaults (repository owner, default license, etc), edit the beginning of the script (the “Settings” section).
+
 ## Features
 
 Note that the following features are currently missing:
