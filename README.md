@@ -25,7 +25,7 @@ Note that the following features are currently missing:
 It creates a new folder with Git repository in it, and then creates a corresponding repository on Github.
 
   * It creates a good .gitignore file.
-  * It sets up branch tracking (so that `git pull` would work automatically).
+  * It creates a tracking branch and makes a commit.
 
 ### Project
 
