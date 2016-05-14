@@ -33,7 +33,7 @@ defaultLicense :: String
 defaultLicense = "BSD3"
 
 defaultGHC :: String
-defaultGHC = "7.8.4 7.10.3"
+defaultGHC = "7.8.4 7.10.3 8.0.1"
 
 -- The main script.
 
@@ -131,9 +131,22 @@ generateProject owner repo description = do
   -- Edit the .cabal file.
   let cabalName = printf "%s.cabal" repo
   cabalFile <- readFile' cabalName
+  putStrLn "Latest GHCs: 7.0.4 7.2.2 7.4.2 7.6.3 7.8.4 7.10.3 8.0.1"
   -- TODO: once GHC 7.8 is dropped, switch to <$>
   testedVersions <- words `fmap`
     queryDef "Versions of GHC to test with? (space-separated)" defaultGHC
+  let baseVer :: String
+      baseVer
+        | found "7.0"  = ">=4.3 && <5"
+        | found "7.2"  = ">=4.4 && <5"
+        | found "7.4"  = ">=4.5 && <5"
+        | found "7.6"  = ">=4.6 && <5"
+        | found "7.8"  = ">=4.7 && <5"
+        | found "7.10" = ">=4.8 && <5"
+        | found "8.0"  = ">=4.9 && <5"
+        | otherwise    = "==4.*"
+        where found v = any (\x -> (v++".") ~== x || v == x) testedVersions
+  printf "Going to use this constraint on base: %s\n" baseVer
   longDescription <-
     (\s -> if s == "repo description" then description else s) `fmap`
     queryDef "Longer description?" "repo description"
@@ -172,6 +185,13 @@ generateProject owner repo description = do
       if "hs-source-dirs" =~= p
         then let (l, x:r) = break ("  hs-source-dirs" ~==) (lines p)
              in  unlines (l ++ [ghcOptions, x] ++ r)
+        else p
+    -- Modify the base dependency.
+    let depends = "  build-depends:       base " ++ baseVer
+    modify $ inEachSection $ \p ->
+      if "build-depends" =~= p
+        then let (l, _:r) = break ("  build-depends" ~==) (lines p)
+             in  unlines (l ++ [depends] ++ r)
         else p
 
   -- Create a changelog and a readme.
