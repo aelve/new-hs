@@ -4,13 +4,11 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 
-{-# LANGUAGE
-OverloadedStrings,
-FlexibleInstances,
-TypeFamilies,
-ScopedTypeVariables,
-MultiWayIf
-  #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE MultiWayIf #-}
 
 
 import Control.Exception
