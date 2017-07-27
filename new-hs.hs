@@ -55,8 +55,9 @@ main = do
     "n" ==> return (),
     "y" ==> "cabal" ["sandbox", "init"] ]
   -- Create a .travis.yml file and enable Travis.
-  "travis" ["enable"]
   generateTravis repo
+  "travis" ["sync"]
+  "travis" ["enable"]
   -- Make a commit and push it.
   "git" ["add", "."]
   "git" ["commit", "-m", "Create the project"]
