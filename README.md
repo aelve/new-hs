@@ -2,6 +2,11 @@
 
 [![Build status](https://secure.travis-ci.org/aelve/new-hs.svg)](http://travis-ci.org/aelve/new-hs)
 
+Deprecated. Please use [Summoner](https://github.com/kowainik/summoner).
+
+<details>
+<summary>See old description</summary>
+
 This is a script for creating a Haskell project and setting up everything that one usually wants to set up (well, not everything, but I'll add some features -that others use- later). To use it, download `new-hs.hs` and then put it somewhere in your `PATH` (for instance, `/usr/local/bin`):
 
     $ wget https://github.com/aelve/new-hs/blob/master/new-hs.hs
@@ -55,3 +60,5 @@ It enables [Travis-CI](http://travis-ci.org/) for the repository and generate a 
 On Arch Linux, you can install all of those things by doing
 
     $ yaourt -S ghc git cabal-install hub ruby-travis
+
+</details>
